@@ -20,8 +20,7 @@ function removeMarkdown(text: string): string {
     .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold **text** - preserve content
     .replace(/\*(.*?)\*/g, '$1') // Remove italic *text* - preserve content
     .replace(/`(.*?)`/g, '$1') // Remove inline code `code` - preserve content
-    .replace(/\[(.*?)\]\(.*?\)/g, '$1') // Remove links [text](url) -> text
-    .replace(/#{1,6}\s+/g, '') // Remove headers # ## ### etc (with spaces)
+   
   // Don't trim here - preserve all spaces in the content
 }
 
