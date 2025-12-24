@@ -9,6 +9,23 @@ import { HumanMessage, SystemMessage, AIMessage } from '@langchain/core/messages
 import { loadKnowledgeBase } from '../data/knowledgeBase.js'
 
 // Helper function to remove markdown formatting and reasoning tags from text (preserves spaces)
+const removeReasoningTags = (content: string): string => {
+  if (!content) return ''
+  
+  // Remove reasoning/thinking tags and their content
+  let cleaned = content
+    .replace(/<think>[\s\S]*?<\/redacted_reasoning>/gi, '')
+    .replace(/<thinking>[\s\S]*?<\/thinking>/gi, '')
+    .replace(/<reasoning>[\s\S]*?<\/reasoning>/gi, '')
+    .replace(/<think>[\s\S]*?<\/think>/gi, '')
+    .replace(/<think>[\s\S]*?<\/think>/gi, '')
+    .replace(/\[DONE\]/gi, '')
+  
+  // Remove any remaining reasoning patterns
+  cleaned = cleaned.replace(/data:\s*\{[^}]*"content":"[^"]*redacted_reasoning[^"]*"\}[^\n]*/gi, '')
+  
+  return cleaned.trim()
+}
 
 
 export class RAGService {
@@ -215,10 +232,12 @@ After each answer, ask a follow-up question to keep the conversation engaging.`
         for await (const chunk of chatCompletion) {
           const content = chunk.choices?.[0]?.delta?.content || ''
           if (content && onChunk) {
-            // Remove markdown formatting before sending to frontend
-            const cleanContent = content
-            onChunk(cleanContent)
-            fullResponse += cleanContent
+            // Remove reasoning tags before sending to frontend
+            const cleanContent = removeReasoningTags(content)
+            if (cleanContent) {
+              onChunk(cleanContent)
+              fullResponse += cleanContent
+            }
           }
         }
       } catch (error: any) {
@@ -249,10 +268,12 @@ After each answer, ask a follow-up question to keep the conversation engaging.`
             for await (const chunk of chatCompletion) {
               const content = chunk.choices?.[0]?.delta?.content || ''
               if (content && onChunk) {
-                // Remove markdown formatting before sending to frontend
-                const cleanContent = content
-                onChunk(cleanContent)
-                fullResponse += cleanContent
+                // Remove reasoning tags before sending to frontend
+                const cleanContent = removeReasoningTags(content)
+                if (cleanContent) {
+                  onChunk(cleanContent)
+                  fullResponse += cleanContent
+                }
               }
             }
           } catch (fallbackError) {
@@ -327,10 +348,12 @@ After each answer, ask a follow-up question to keep the conversation engaging.`)
             for await (const chunk of stream) {
               const content = typeof chunk.content === 'string' ? chunk.content : String(chunk.content)
               if (content && onChunk) {
-                // Remove markdown formatting before sending to frontend
-                const cleanContent = content
-                onChunk(cleanContent)
-                fullResponse += cleanContent
+                // Remove reasoning tags before sending to frontend
+                const cleanContent = removeReasoningTags(content)
+                if (cleanContent) {
+                  onChunk(cleanContent)
+                  fullResponse += cleanContent
+                }
               }
             }
           } catch (streamError: any) {
@@ -349,11 +372,11 @@ After each answer, ask a follow-up question to keep the conversation engaging.`)
                 const response = await fallbackLLM.invoke(langchainMessages)
                 const content = typeof response.content === 'string' ? response.content : String(response.content)
                 
-                // Simulate streaming
-                const cleanContent = content
+                // Remove reasoning tags and simulate streaming
+                const cleanContent = removeReasoningTags(content)
                 for (let i = 0; i < cleanContent.length; i += 5) {
                   const chunk = cleanContent.slice(i, i + 5)
-                  if (onChunk) {
+                  if (chunk && onChunk) {
                     onChunk(chunk)
                   }
                   fullResponse += chunk
@@ -364,11 +387,11 @@ After each answer, ask a follow-up question to keep the conversation engaging.`)
                 const response = await this.llm.invoke(langchainMessages)
                 const content = typeof response.content === 'string' ? response.content : String(response.content)
                 
-                // Simulate streaming
-                const cleanContent = content
+                // Remove reasoning tags and simulate streaming
+                const cleanContent = removeReasoningTags(content)
                 for (let i = 0; i < cleanContent.length; i += 5) {
                   const chunk = cleanContent.slice(i, i + 5)
-                  if (onChunk) {
+                  if (chunk && onChunk) {
                     onChunk(chunk)
                   }
                   fullResponse += chunk
@@ -380,15 +403,16 @@ After each answer, ask a follow-up question to keep the conversation engaging.`)
               const response = await this.llm.invoke(langchainMessages)
               const content = typeof response.content === 'string' ? response.content : String(response.content)
               
-              // Simulate streaming
-              for (let i = 0; i < content.length; i += 5) {
-                const chunk = content.slice(i, i + 5)
-                if (onChunk) {
-                  onChunk(chunk)
-                }
-                fullResponse += chunk
-                await new Promise((resolve) => setTimeout(resolve, 10))
-              }
+          // Remove reasoning tags and simulate streaming
+          const cleanContent = removeReasoningTags(content)
+          for (let i = 0; i < cleanContent.length; i += 5) {
+            const chunk = cleanContent.slice(i, i + 5)
+            if (chunk && onChunk) {
+              onChunk(chunk)
+            }
+            fullResponse += chunk
+            await new Promise((resolve) => setTimeout(resolve, 10))
+          }
             }
           }
         } else if (this.llm instanceof ChatOpenAI) {
@@ -398,10 +422,12 @@ After each answer, ask a follow-up question to keep the conversation engaging.`)
             for await (const chunk of stream) {
               const content = typeof chunk.content === 'string' ? chunk.content : String(chunk.content)
               if (content && onChunk) {
-                // Remove markdown formatting before sending to frontend
-                const cleanContent = content
-                onChunk(cleanContent)
-                fullResponse += cleanContent
+                // Remove reasoning tags before sending to frontend
+                const cleanContent = removeReasoningTags(content)
+                if (cleanContent) {
+                  onChunk(cleanContent)
+                  fullResponse += cleanContent
+                }
               }
             }
           } catch (streamError) {
@@ -410,8 +436,8 @@ After each answer, ask a follow-up question to keep the conversation engaging.`)
             const response = await this.llm.invoke(langchainMessages)
             const content = typeof response.content === 'string' ? response.content : String(response.content)
             
-            // Simulate streaming
-            const cleanContent = content
+            // Remove reasoning tags and simulate streaming
+            const cleanContent = removeReasoningTags(content)
             for (let i = 0; i < cleanContent.length; i += 5) {
               const chunk = cleanContent.slice(i, i + 5)
               if (onChunk) {
@@ -426,11 +452,11 @@ After each answer, ask a follow-up question to keep the conversation engaging.`)
           const response = await this.llm.invoke(langchainMessages)
           const content = typeof response.content === 'string' ? response.content : String(response.content)
           
-          // Simulate streaming by sending chunks
-          const cleanContent = content
+          // Remove reasoning tags and simulate streaming by sending chunks
+          const cleanContent = removeReasoningTags(content)
           for (let i = 0; i < cleanContent.length; i += 5) {
             const chunk = cleanContent.slice(i, i + 5)
-            if (onChunk) {
+            if (chunk && onChunk) {
               onChunk(chunk)
             }
             fullResponse += chunk
