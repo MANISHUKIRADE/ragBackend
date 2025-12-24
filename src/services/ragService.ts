@@ -9,20 +9,7 @@ import { HumanMessage, SystemMessage, AIMessage } from '@langchain/core/messages
 import { loadKnowledgeBase } from '../data/knowledgeBase.js'
 
 // Helper function to remove markdown formatting and reasoning tags from text (preserves spaces)
-function removeMarkdown(text: string): string {
-  if (!text) return text
-  
-  return text
-    .replace(/<think>[\s\S]*?<\/redacted_reasoning>/gi, '') // Remove redacted_reasoning tags
-    .replace(/<think>[\s\S]*?<\/think>/gi, '') // Remove think tags
-    .replace(/<thinking>[\s\S]*?<\/thinking>/gi, '') // Remove thinking tags
-    .replace(/<reasoning>[\s\S]*?<\/reasoning>/gi, '') // Remove reasoning tags
-    .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold **text** - preserve content
-    .replace(/\*(.*?)\*/g, '$1') // Remove italic *text* - preserve content
-    .replace(/`(.*?)`/g, '$1') // Remove inline code `code` - preserve content
-   
-  // Don't trim here - preserve all spaces in the content
-}
+
 
 export class RAGService {
   private vectorStore: FaissStore | null = null
@@ -229,7 +216,7 @@ After each answer, ask a follow-up question to keep the conversation engaging.`
           const content = chunk.choices?.[0]?.delta?.content || ''
           if (content && onChunk) {
             // Remove markdown formatting before sending to frontend
-            const cleanContent = removeMarkdown(content)
+            const cleanContent = content
             onChunk(cleanContent)
             fullResponse += cleanContent
           }
@@ -263,7 +250,7 @@ After each answer, ask a follow-up question to keep the conversation engaging.`
               const content = chunk.choices?.[0]?.delta?.content || ''
               if (content && onChunk) {
                 // Remove markdown formatting before sending to frontend
-                const cleanContent = removeMarkdown(content)
+                const cleanContent = content
                 onChunk(cleanContent)
                 fullResponse += cleanContent
               }
@@ -341,7 +328,7 @@ After each answer, ask a follow-up question to keep the conversation engaging.`)
               const content = typeof chunk.content === 'string' ? chunk.content : String(chunk.content)
               if (content && onChunk) {
                 // Remove markdown formatting before sending to frontend
-                const cleanContent = removeMarkdown(content)
+                const cleanContent = content
                 onChunk(cleanContent)
                 fullResponse += cleanContent
               }
@@ -363,7 +350,7 @@ After each answer, ask a follow-up question to keep the conversation engaging.`)
                 const content = typeof response.content === 'string' ? response.content : String(response.content)
                 
                 // Simulate streaming
-                const cleanContent = removeMarkdown(content)
+                const cleanContent = content
                 for (let i = 0; i < cleanContent.length; i += 5) {
                   const chunk = cleanContent.slice(i, i + 5)
                   if (onChunk) {
@@ -378,7 +365,7 @@ After each answer, ask a follow-up question to keep the conversation engaging.`)
                 const content = typeof response.content === 'string' ? response.content : String(response.content)
                 
                 // Simulate streaming
-                const cleanContent = removeMarkdown(content)
+                const cleanContent = content
                 for (let i = 0; i < cleanContent.length; i += 5) {
                   const chunk = cleanContent.slice(i, i + 5)
                   if (onChunk) {
@@ -412,7 +399,7 @@ After each answer, ask a follow-up question to keep the conversation engaging.`)
               const content = typeof chunk.content === 'string' ? chunk.content : String(chunk.content)
               if (content && onChunk) {
                 // Remove markdown formatting before sending to frontend
-                const cleanContent = removeMarkdown(content)
+                const cleanContent = content
                 onChunk(cleanContent)
                 fullResponse += cleanContent
               }
@@ -424,7 +411,7 @@ After each answer, ask a follow-up question to keep the conversation engaging.`)
             const content = typeof response.content === 'string' ? response.content : String(response.content)
             
             // Simulate streaming
-            const cleanContent = removeMarkdown(content)
+            const cleanContent = content
             for (let i = 0; i < cleanContent.length; i += 5) {
               const chunk = cleanContent.slice(i, i + 5)
               if (onChunk) {
@@ -440,7 +427,7 @@ After each answer, ask a follow-up question to keep the conversation engaging.`)
           const content = typeof response.content === 'string' ? response.content : String(response.content)
           
           // Simulate streaming by sending chunks
-          const cleanContent = removeMarkdown(content)
+          const cleanContent = content
           for (let i = 0; i < cleanContent.length; i += 5) {
             const chunk = cleanContent.slice(i, i + 5)
             if (onChunk) {
